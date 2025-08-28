@@ -1,12 +1,13 @@
 import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
-import productRouter from "./routes/productRoute.js";
+
 import userRouter from "./routes/userRoute.js";
 import jwt from "jsonwebtoken";
-import orderRouter from "./routes/orderRoute.js";
+
 import cors from "cors";
 import dotenv from "dotenv";
+import listingRouter from "./routes/listingRoute.js";
 
 dotenv.config();
 
@@ -47,9 +48,8 @@ mongoose
     console.log("Database connection failed");
   });
 
-app.use("/api/products", productRouter);
 app.use("/api/users", userRouter);
-app.use("/api/orders", orderRouter);
+app.use("/api/listings", listingRouter);
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
