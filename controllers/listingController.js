@@ -20,14 +20,8 @@ export async function getListings(req, res) {
 }
 
 // 🔹 Save a new listing
+// 🔹 Save a new listing (all users allowed)
 export function saveListing(req, res) {
-  if (!isAdmin(req)) {
-    res.status(403).json({
-      message: "You are not authorized to add a listing",
-    });
-    return;
-  }
-
   const listing = new Listing(req.body);
 
   listing
@@ -39,22 +33,33 @@ export function saveListing(req, res) {
     })
     .catch((e) => {
       console.log(e);
-      res.json({
+      res.status(500).json({
         message: "Error adding listing",
+        error: e,
       });
     });
 }
 
 // 🔹 Delete a listing
+// 🔹 Delete a listing (admin or owner)
 export async function deleteListing(req, res) {
-  if (!isAdmin(req)) {
-    res.status(403).json({
-      message: "You are not authorized to delete a listing",
-    });
-    return;
-  }
+  const slug = req.params.slug;
+
   try {
-    await Listing.deleteOne({ slug: req.params.slug });
+    const listing = await Listing.findOne({ slug: slug });
+
+    if (!listing) {
+      return res.status(404).json({ message: "Listing not found" });
+    }
+
+    // Check if user is admin or owner
+    if (!isAdmin(req) && listing.userId.toString() !== req.user.id) {
+      return res.status(403).json({
+        message: "You are not authorized to delete this listing",
+      });
+    }
+
+    await Listing.deleteOne({ slug: slug });
 
     res.json({
       message: "Listing deleted successfully",
@@ -62,7 +67,7 @@ export async function deleteListing(req, res) {
   } catch (err) {
     res.status(500).json({
       message: "Failed to delete listing",
-      err: err,
+      error: err,
     });
   }
 }
