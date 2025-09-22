@@ -7,7 +7,7 @@ const listingSchema = mongoose.Schema(
     slug: { type: String, index: true },
     price: { type: Number, required: true, min: 0 },
     currency: { type: String, default: "LKR" },
-    image: { type: String }, // main image URL
+    image: [{ type: String }], // main image URL
     country: { type: String, required: true },
     category: { type: String, required: true }, // e.g., Vehicles, Electronics
     postedAgo: { type: String, default: "1 month ago" },
