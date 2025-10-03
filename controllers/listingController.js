@@ -21,23 +21,46 @@ export async function getListings(req, res) {
 
 // 🔹 Save a new listing
 // 🔹 Save a new listing (all users allowed)
-export function saveListing(req, res) {
-  const listing = new Listing(req.body);
 
-  listing
-    .save()
-    .then(() => {
-      res.json({
-        message: "Listing added successfully",
-      });
-    })
-    .catch((e) => {
-      console.log(e);
-      res.status(500).json({
-        message: "Error adding listing",
-        error: e,
-      });
+export async function saveListing(req, res) {
+  try {
+    // Find the last listing by createdAt
+    const lastListing = await Listing.find().sort({ createdAt: -1 }).limit(1);
+
+    let listingId = "LST00001";
+
+    if (lastListing.length > 0) {
+      const lastListingId = lastListing[0].listingId; // e.g., "LST00551"
+
+      // Extract numeric part
+      const lastListingNumber = parseInt.lastListingId.replace("LST", "");
+
+      // Generate next number
+      const newListingNumber = lastListingNumber + 1;
+      const newListingNumberString = String(newListingNumber).padStart(5, "0");
+
+      listingId = "LST" + newListingNumberString; // e.g., "LST00552"
+    }
+
+    // Assign listingId + body
+    const listing = new Listing({
+      ...req.body,
+      listingId,
     });
+
+    await listing.save();
+
+    res.json({
+      message: "Listing added successfully",
+      listingId: listingId,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({
+      message: "Error adding listing",
+      error: e.message,
+    });
+  }
 }
 
 // 🔹 Delete a listing
