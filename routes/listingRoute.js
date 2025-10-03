@@ -16,6 +16,6 @@ listingRouter.post("/", saveListing);
 listingRouter.delete("/:productId", deleteListing);
 listingRouter.put("/:productId", updateListing);
 listingRouter.get("/search/:query", searchListings);
-listingRouter.get("/:productId", getListingBySlug);
+listingRouter.get("/:listingId", getListingBySlug);
 
 export default listingRouter;
