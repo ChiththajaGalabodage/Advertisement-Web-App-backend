@@ -118,29 +118,12 @@ export async function updateListing(req, res) {
 
 // 🔹 Get a single listing by slug
 export async function getListingBySlug(req, res) {
-  const slug = req.params.slug;
-
   try {
-    const listing = await Listing.findOne({ slug: slug });
-
-    if (listing == null) {
-      res.status(404).json({
-        message: "Listing not found",
-      });
-      return;
-    }
-    if (listing.featured || isAdmin(req)) {
-      res.json(listing);
-    } else {
-      res.status(404).json({
-        message: "Listing not found",
-      });
-    }
+    const listing = await Listing.findOne({ listingId: req.params.listingId });
+    if (!listing) return res.status(404).json({ message: "Listing not found" });
+    res.json(listing);
   } catch (err) {
-    res.status(500).json({
-      message: "Internal server error",
-      error: err,
-    });
+    res.status(500).json({ message: "Server Error" });
   }
 }
 
