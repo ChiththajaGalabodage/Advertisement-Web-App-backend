@@ -24,25 +24,20 @@ export async function getListings(req, res) {
 
 export async function saveListing(req, res) {
   try {
-    // Find the last listing by createdAt
-    const lastListing = await Listing.find().sort({ createdAt: -1 }).limit(1);
-
     let listingId = "LST00001";
 
-    if (lastListing.length > 0) {
-      const lastListingId = lastListing[0].listingId; // e.g., "LST00551"
+    // Find the latest listing by _id (MongoDB ObjectId increases with time)
+    const lastListing = await Listing.findOne().sort({ _id: -1 });
 
-      // Extract numeric part
-      const lastListingNumber = parseInt.lastListingId.replace("LST", "");
-
-      // Generate next number
+    if (lastListing) {
+      const lastListingId = lastListing.listingId; // e.g., "LST00551"
+      const lastListingNumber = parseInt(lastListingId.replace("LST", "")); // 551
       const newListingNumber = lastListingNumber + 1;
       const newListingNumberString = String(newListingNumber).padStart(5, "0");
-
       listingId = "LST" + newListingNumberString; // e.g., "LST00552"
     }
 
-    // Assign listingId + body
+    // Create new listing
     const listing = new Listing({
       ...req.body,
       listingId,

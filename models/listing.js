@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const listingSchema = mongoose.Schema(
   {
-    listingId: { type: String, required: true, unique: true },
+    listingId: { type: String, required: true }, // e.g., "LST00551"
     title: { type: String, required: true, trim: true },
     description: { type: String, required: true },
     slug: { type: String, index: true },
