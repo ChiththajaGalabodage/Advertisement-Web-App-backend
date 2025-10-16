@@ -8,6 +8,21 @@ const listingSchema = mongoose.Schema(
     slug: { type: String, index: true },
     price: { type: Number, required: true, min: 0 },
     currency: { type: String, default: "LKR" },
+    category: {
+      type: String,
+      required: true,
+      enum: [
+        "Vehicles",
+        "Hobbies",
+        "Home & Living",
+        "Business & Industry",
+        "Property",
+        "Women's Fashion & Beauty",
+        "Men's Fashion & Grooming",
+        "Essentials",
+        "Education",
+      ],
+    },
     image: [{ type: String }], // main image URL
     country: { type: String, required: true },
     category: { type: String, required: true }, // e.g., Vehicles, Electronics
