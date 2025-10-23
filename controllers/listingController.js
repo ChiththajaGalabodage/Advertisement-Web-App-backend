@@ -19,6 +19,8 @@ export async function getListings(req, res) {
   }
 }
 
+// GET all listings (with a filter)
+
 // 🔹 Save a new listing
 // 🔹 Save a new listing (all users allowed)
 
