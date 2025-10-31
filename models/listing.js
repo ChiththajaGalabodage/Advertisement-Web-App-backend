@@ -31,6 +31,13 @@ const listingSchema = mongoose.Schema(
     urgent: { type: Boolean, default: false },
     badge: { type: String }, // e.g., "NEW", "HOT", "DEAL"
   },
+  {
+    userRef: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", // Tells Mongoose this ID refers to the 'User' model
+      required: true,
+    },
+  },
   { timestamps: true }
 );
 
