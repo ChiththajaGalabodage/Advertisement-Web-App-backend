@@ -140,7 +140,11 @@ export async function searchListings(req, res) {
         { badge: { $regex: searchQuery, $options: "i" } },
       ],
       featured: true, // show only featured/available for users
-    });
+    }).populate(
+      // 2. Chain .populate() to the find() query
+      "userRef", // The field in the Listing model to populate
+      "username email profilePicture phoneNumber" // The specific fields from the User model to include
+    );
     res.json(listings);
   } catch (err) {
     res.status(500).json({
