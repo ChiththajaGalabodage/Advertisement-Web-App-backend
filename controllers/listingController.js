@@ -15,7 +15,8 @@ export async function createListing(req, res) {
     const { title, description, price, category, country, image } = req.body;
     if (!title || !description || !price || !category || !country) {
       return res.status(400).json({
-        message: "Title, description, price, category, and country are required",
+        message:
+          "Title, description, price, category, and country are required",
       });
     }
 
@@ -24,7 +25,9 @@ export async function createListing(req, res) {
     const lastListing = await Listing.findOne().sort({ _id: -1 });
 
     if (lastListing && lastListing.listingId) {
-      const lastListingNumber = parseInt(lastListing.listingId.replace("LST", ""));
+      const lastListingNumber = parseInt(
+        lastListing.listingId.replace("LST", ""),
+      );
       const newListingNumber = lastListingNumber + 1;
       const newListingNumberString = String(newListingNumber).padStart(5, "0");
       listingId = "LST" + newListingNumberString;
@@ -211,7 +214,7 @@ export async function searchListings(req, res) {
     }).populate(
       // 2. Chain .populate() to the find() query
       "userRef", // The field in the Listing model to populate
-      "username email profilePicture phoneNumber" // The specific fields from the User model to include
+      "username email profilePicture phoneNumber", // The specific fields from the User model to include
     );
     res.json(listings);
   } catch (err) {
