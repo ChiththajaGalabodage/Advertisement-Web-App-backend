@@ -7,6 +7,64 @@ import nodemailer from "nodemailer";
 import OTP from "../models/otp.js";
 dotenv.config();
 
+export function registerUser(req, res) {
+  try {
+    const { firstName, lastName, email, password } = req.body;
+
+    // Validate required fields
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(400).json({
+        message: "All fields are required",
+      });
+    }
+
+    // Hash password using bcrypt
+    const hashedPassword = bcrypt.hashSync(password, 10);
+
+    // Create new user object
+    const newUser = new User({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      role: "customer", // Default role for new registrations
+    });
+
+    // Save user to MongoDB
+    newUser
+      .save()
+      .then((user) => {
+        res.status(201).json({
+          message: "User registered successfully",
+          user: {
+            id: user._id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            role: user.role,
+          },
+        });
+      })
+      .catch((error) => {
+        if (error.code === 11000) {
+          // Duplicate email error
+          return res.status(409).json({
+            message: "Email already registered",
+          });
+        }
+        res.status(500).json({
+          message: "Failed to register user",
+          error: error.message,
+        });
+      });
+  } catch (error) {
+    res.status(500).json({
+      message: "Registration failed",
+      error: error.message,
+    });
+  }
+}
+
 export function createUser(req, res) {
   if (req.body.role == "admin") {
     if (req.user != null) {
@@ -69,7 +127,7 @@ export function loginUser(req, res) {
             role: user.role,
             img: user.img,
           },
-          process.env.JWT_KEY
+          process.env.JWT_KEY,
         );
 
         res.json({
@@ -99,7 +157,7 @@ export async function loginWithGoogle(req, res) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
   console.log(response.data);
 
@@ -121,7 +179,7 @@ export async function loginWithGoogle(req, res) {
         role: newUser.role,
         img: newUser.img,
       },
-      process.env.JWT_KEY
+      process.env.JWT_KEY,
     );
     res.json({
       message: "Login successful",
@@ -137,7 +195,7 @@ export async function loginWithGoogle(req, res) {
         role: user.role,
         img: user.img,
       },
-      process.env.JWT_KEY
+      process.env.JWT_KEY,
     );
     res.json({
       message: "Login successful",
@@ -198,7 +256,7 @@ export async function sendOTP(req, res) {
           otp: randomOTP,
         });
       }
-    }
+    },
   );
 }
 export async function resetPassword(req, res) {
@@ -224,7 +282,7 @@ export async function resetPassword(req, res) {
       { email: email },
       {
         password: hashedPassword,
-      }
+      },
     );
     res.json({
       message: "password has been reset successfully",

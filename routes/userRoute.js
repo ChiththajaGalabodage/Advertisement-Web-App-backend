@@ -5,6 +5,7 @@ import {
   getUser,
   loginUser,
   loginWithGoogle,
+  registerUser,
   resetPassword,
   sendOTP,
 } from "../controllers/userController.js";
@@ -12,6 +13,7 @@ import {
 const userRouter = express.Router();
 
 userRouter.post("/", createUser);
+userRouter.post("/register", registerUser);
 userRouter.post("/login", loginUser);
 userRouter.post("/login/google", loginWithGoogle);
 userRouter.post("/send-otp", sendOTP);
