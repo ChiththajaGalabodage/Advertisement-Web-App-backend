@@ -1,6 +1,7 @@
 import express from "express";
 
 import {
+  createListing,
   deleteListing,
   getListingBySlug,
   getListings,
@@ -12,6 +13,7 @@ import {
 const listingRouter = express.Router();
 
 listingRouter.get("/", getListings);
+listingRouter.post("/create", createListing); // Requires JWT token
 listingRouter.post("/", saveListing);
 listingRouter.delete("/:productId", deleteListing);
 listingRouter.put("/:productId", updateListing);

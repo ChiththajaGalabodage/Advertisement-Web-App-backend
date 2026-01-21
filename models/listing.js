@@ -23,18 +23,18 @@ const listingSchema = mongoose.Schema(
         "Education",
       ],
     },
-    image: [{ type: String }], // main image URL
+    image: {
+      type: [String], // Array of image URLs from Supabase
+      default: [],
+    },
     country: { type: String, required: true },
-    category: { type: String, required: true }, // e.g., Vehicles, Electronics
     postedAgo: { type: String, default: "1 month ago" },
     featured: { type: Boolean, default: false },
     urgent: { type: Boolean, default: false },
     badge: { type: String }, // e.g., "NEW", "HOT", "DEAL"
-  },
-  {
     userRef: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Tells Mongoose this ID refers to the 'User' model
+      ref: "User", // Reference to the User model
       required: true,
     },
   },

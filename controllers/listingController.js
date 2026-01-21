@@ -1,6 +1,74 @@
 import Listing from "../models/listing.js";
 import { isAdmin } from "./userController.js";
 
+// 🔹 Create a new listing (requires JWT token)
+export async function createListing(req, res) {
+  try {
+    // Check if user is authenticated (JWT token validated by middleware)
+    if (!req.user) {
+      return res.status(401).json({
+        message: "Unauthorized. Please login to create a listing.",
+      });
+    }
+
+    // Validate required fields
+    const { title, description, price, category, country, image } = req.body;
+    if (!title || !description || !price || !category || !country) {
+      return res.status(400).json({
+        message: "Title, description, price, category, and country are required",
+      });
+    }
+
+    // Generate listing ID
+    let listingId = "LST00001";
+    const lastListing = await Listing.findOne().sort({ _id: -1 });
+
+    if (lastListing && lastListing.listingId) {
+      const lastListingNumber = parseInt(lastListing.listingId.replace("LST", ""));
+      const newListingNumber = lastListingNumber + 1;
+      const newListingNumberString = String(newListingNumber).padStart(5, "0");
+      listingId = "LST" + newListingNumberString;
+    }
+
+    // Create new listing with user reference
+    const newListing = new Listing({
+      listingId,
+      title,
+      description,
+      price,
+      category,
+      country,
+      image: image || [], // Accept string or array of image URLs from Supabase
+      userRef: req.user.id, // Associate listing with authenticated user
+      featured: false,
+      urgent: req.body.urgent || false,
+      badge: req.body.badge || null,
+      currency: req.body.currency || "LKR",
+      postedAgo: "just now",
+    });
+
+    await newListing.save();
+
+    res.status(201).json({
+      message: "Listing created successfully",
+      listing: {
+        _id: newListing._id,
+        listingId: newListing.listingId,
+        title: newListing.title,
+        price: newListing.price,
+        category: newListing.category,
+        image: newListing.image,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Failed to create listing",
+      error: error.message,
+    });
+  }
+}
+
 // 🔹 Get all listings (Admins see all, normal users see only available ones)
 export async function getListings(req, res) {
   try {
