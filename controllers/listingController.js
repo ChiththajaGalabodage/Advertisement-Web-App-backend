@@ -72,20 +72,25 @@ export async function createListing(req, res) {
   }
 }
 
-// 🔹 Get all listings (Admins see all, normal users see only available ones)
+// 🔹 Get all listings (ordered by creation date - newest first)
 export async function getListings(req, res) {
   try {
-    if (isAdmin(req)) {
-      const listings = await Listing.find();
-      res.json(listings);
-    } else {
-      const listings = await Listing.find({ featured: true }); // example filter for users
-      res.json(listings);
-    }
+    // Fetch all listings, sorted by creation date (newest first)
+    const listings = await Listing.find()
+      .sort({ createdAt: -1 }) // Sort by creation date in descending order
+      .populate("userRef", "firstName lastName email img") // Include user details
+      .exec();
+
+    res.status(200).json({
+      message: "Listings fetched successfully",
+      count: listings.length,
+      listings: listings,
+    });
   } catch (err) {
-    res.json({
-      message: "Failed to get listings",
-      error: err,
+    console.error(err);
+    res.status(500).json({
+      message: "Failed to fetch listings",
+      error: err.message,
     });
   }
 }
@@ -200,6 +205,42 @@ export async function getListingBySlug(req, res) {
   }
 }
 
+// 🔹 Get a single listing by MongoDB ID
+export async function getListingById(req, res) {
+  try {
+    const { id } = req.params;
+
+    // Validate if id is a valid MongoDB ObjectId
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({
+        message: "Invalid listing ID format",
+      });
+    }
+
+    const listing = await Listing.findById(id).populate(
+      "userRef",
+      "firstName lastName email img",
+    );
+
+    if (!listing) {
+      return res.status(404).json({
+        message: "Listing not found",
+      });
+    }
+
+    res.status(200).json({
+      message: "Listing retrieved successfully",
+      listing,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: "Failed to retrieve listing",
+      error: err.message,
+    });
+  }
+}
+
 // 🔹 Search listings by title, category, or badge
 export async function searchListings(req, res) {
   const searchQuery = req.params.query;
@@ -221,6 +262,145 @@ export async function searchListings(req, res) {
     res.status(500).json({
       message: "Internal server error",
       error: err,
+    });
+  }
+}
+
+// 🔹 Delete a listing by admin (requires JWT token and admin role)
+export async function deleteListingByAdmin(req, res) {
+  try {
+    // Check if user is authenticated (JWT token validated by middleware)
+    if (!req.user) {
+      return res.status(401).json({
+        message: "Unauthorized. Please login to delete a listing.",
+      });
+    }
+
+    // Check if user has admin role
+    if (req.user.role !== "admin") {
+      return res.status(403).json({
+        message: "Forbidden. Only admins can delete listings.",
+      });
+    }
+
+    const listingId = req.params.id;
+
+    // Validate listing ID format
+    if (!listingId) {
+      return res.status(400).json({
+        message: "Listing ID is required",
+      });
+    }
+
+    // Find and delete the listing
+    const listing = await Listing.findByIdAndDelete(listingId);
+
+    if (!listing) {
+      return res.status(404).json({
+        message: "Listing not found",
+      });
+    }
+
+    res.status(200).json({
+      message: "Listing deleted successfully",
+      deletedListing: {
+        _id: listing._id,
+        listingId: listing.listingId,
+        title: listing.title,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Failed to delete listing",
+      error: error.message,
+    });
+  }
+}
+
+// 🔹 Update a listing by owner (requires JWT token and ownership verification)
+export async function updateListingByOwner(req, res) {
+  try {
+    // Check if user is authenticated (JWT token validated by middleware)
+    if (!req.user) {
+      return res.status(401).json({
+        message: "Unauthorized. Please login to update a listing.",
+      });
+    }
+
+    const { id } = req.params;
+
+    // Validate if id is a valid MongoDB ObjectId
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({
+        message: "Invalid listing ID format",
+      });
+    }
+
+    // Find the listing
+    const listing = await Listing.findById(id);
+
+    if (!listing) {
+      return res.status(404).json({
+        message: "Listing not found",
+      });
+    }
+
+    // Verify ownership - check if the authenticated user is the listing owner
+    if (listing.userRef.toString() !== req.user.id) {
+      return res.status(403).json({
+        message: "You are not authorized to update this listing",
+      });
+    }
+
+    // Define updatable fields (prevent userRef and listingId changes)
+    const updatableFields = [
+      "title",
+      "description",
+      "price",
+      "category",
+      "country",
+      "image",
+      "urgent",
+      "badge",
+      "currency",
+      "featured",
+    ];
+
+    const updateData = {};
+    updatableFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        updateData[field] = req.body[field];
+      }
+    });
+
+    // Validate required fields if they're being updated
+    if (
+      (updateData.title && !updateData.title.trim()) ||
+      (updateData.description && !updateData.description.trim()) ||
+      (updateData.price && updateData.price <= 0) ||
+      (updateData.category && !updateData.category.trim())
+    ) {
+      return res.status(400).json({
+        message: "Invalid field values provided",
+      });
+    }
+
+    // Update the listing
+    const updatedListing = await Listing.findByIdAndUpdate(id, updateData, {
+      new: true, // Return updated document
+      runValidators: true, // Run schema validators
+    }).populate("userRef", "firstName lastName email img");
+
+    res.status(200).json({
+      message: "Listing updated successfully",
+      listing: updatedListing,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Failed to update listing",
+      error: error.message,
     });
   }
 }

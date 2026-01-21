@@ -25,6 +25,7 @@ export function registerUser(req, res) {
     const newUser = new User({
       firstName,
       lastName,
+      name: `${firstName} ${lastName}`, // Combine first and last name for name field
       email,
       password: hashedPassword,
       role: "customer", // Default role for new registrations
@@ -88,6 +89,7 @@ export function createUser(req, res) {
   const user = new User({
     firstName: req.body.firstName,
     lastName: req.body.lastName,
+    name: `${req.body.firstName} ${req.body.lastName}`, // Combine first and last name
     email: req.body.email,
     password: hashedPassword,
     role: req.body.role,
