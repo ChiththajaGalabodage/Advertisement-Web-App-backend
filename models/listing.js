@@ -37,6 +37,10 @@ const listingSchema = mongoose.Schema(
       ref: "User", // Reference to the User model
       required: true,
     },
+    views: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true },
 );

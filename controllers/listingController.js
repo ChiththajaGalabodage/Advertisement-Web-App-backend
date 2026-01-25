@@ -78,7 +78,7 @@ export async function getListings(req, res) {
     // Fetch all listings, sorted by creation date (newest first)
     const listings = await Listing.find()
       .sort({ createdAt: -1 }) // Sort by creation date in descending order
-      .populate("userRef", "firstName lastName email img") // Include user details
+      .populate("userRef", "firstName lastName email img phoneNumber") // Include user details
       .exec();
 
     res.status(200).json({
@@ -255,7 +255,7 @@ export async function searchListings(req, res) {
     }).populate(
       // 2. Chain .populate() to the find() query
       "userRef", // The field in the Listing model to populate
-      "username email profilePicture phoneNumber", // The specific fields from the User model to include
+      "firstName lastName email img phoneNumber", // The specific fields from the User model to include
     );
     res.json(listings);
   } catch (err) {
@@ -390,7 +390,7 @@ export async function updateListingByOwner(req, res) {
     const updatedListing = await Listing.findByIdAndUpdate(id, updateData, {
       new: true, // Return updated document
       runValidators: true, // Run schema validators
-    }).populate("userRef", "firstName lastName email img");
+    }).populate("userRef", "firstName lastName email img phoneNumber");
 
     res.status(200).json({
       message: "Listing updated successfully",

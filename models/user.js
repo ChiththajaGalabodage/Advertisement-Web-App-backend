@@ -36,6 +36,11 @@ const userSchema = mongoose.Schema(
       required: false,
       default: "https://avatar.iran.liara.run/public/boy?username=Ash",
     },
+    phoneNumber: {
+      type: String,
+      required: false,
+      trim: true,
+    },
     isAdmin: {
       type: Boolean,
       default: false,
@@ -49,7 +54,7 @@ const userSchema = mongoose.Schema(
   },
   {
     timestamps: true, // Adds createdAt and updatedAt timestamps
-  }
+  },
 );
 
 const User = mongoose.model("users", userSchema);
