@@ -7,7 +7,7 @@ import {
   getListingById,
   getListingBySlug,
   getListings,
-  saveListing,
+  //saveListing,
   searchListings,
   updateListing,
   updateListingByOwner,
@@ -17,7 +17,7 @@ const listingRouter = express.Router();
 
 listingRouter.get("/", getListings);
 listingRouter.post("/create", createListing); // Requires JWT token
-listingRouter.post("/", saveListing);
+//listingRouter.post("/", saveListing);
 listingRouter.put("/:id", updateListingByOwner); // Update by owner - Requires JWT token + ownership verification
 listingRouter.delete("/delete/:id", deleteListingByAdmin); // Requires JWT token + admin role
 listingRouter.delete("/:productId", deleteListing);

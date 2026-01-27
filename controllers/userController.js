@@ -9,7 +9,7 @@ dotenv.config();
 
 export function registerUser(req, res) {
   try {
-    const { firstName, lastName, email, password } = req.body;
+    const { firstName, lastName, email, password, phoneNumber } = req.body;
 
     // Validate required fields
     if (!firstName || !lastName || !email || !password) {
@@ -28,6 +28,7 @@ export function registerUser(req, res) {
       name: `${firstName} ${lastName}`, // Combine first and last name for name field
       email,
       password: hashedPassword,
+      phoneNumber: phoneNumber || "", // Optional phone number
       role: "customer", // Default role for new registrations
     });
 
@@ -42,6 +43,7 @@ export function registerUser(req, res) {
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
+            phoneNumber: user.phoneNumber,
             role: user.role,
           },
         });
@@ -67,18 +69,11 @@ export function registerUser(req, res) {
 }
 
 export function createUser(req, res) {
+  // Only admins can create admin accounts
   if (req.body.role == "admin") {
-    if (req.user != null) {
-      if (req.user.role != "admin") {
-        res.status(403).json({
-          message: "You are not authorized to create an admin account",
-        });
-        return;
-      }
-    } else {
+    if (req.user == null || req.user.role != "admin") {
       res.status(403).json({
-        message:
-          "You are not authorized to create an admin account. Please login first",
+        message: "You are not authorized to create an admin account",
       });
       return;
     }
@@ -92,7 +87,7 @@ export function createUser(req, res) {
     name: `${req.body.firstName} ${req.body.lastName}`, // Combine first and last name
     email: req.body.email,
     password: hashedPassword,
-    role: req.body.role,
+    role: req.body.role || "customer", // Default to customer role
   });
 
   user
