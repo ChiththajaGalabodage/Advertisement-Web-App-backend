@@ -118,6 +118,7 @@ export function loginUser(req, res) {
       if (isPasswordCorrect) {
         const token = jwt.sign(
           {
+            id: user.id,
             email: user.email,
             firstName: user.firstName,
             lastName: user.lastName,
@@ -291,7 +292,7 @@ export async function resetPassword(req, res) {
   }
 }
 
-export async function getUser(req, res) {
+/*export async function getUser(req, res) {
   if (req.user == null) {
     res.status(403).json({
       message: "You are not authorized to view user details",
@@ -302,7 +303,7 @@ export async function getUser(req, res) {
       ...req.user,
     });
   }
-}
+}*/
 export function isAdmin(req) {
   if (req.user == null) {
     return false;

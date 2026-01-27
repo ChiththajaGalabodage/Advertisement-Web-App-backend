@@ -65,6 +65,7 @@ mongoose
   });
 
 app.use("/api/users", userRouter);
+app.use("/admin/users", userRouter);
 app.use("/api/listings", listingRouter);
 app.use("/api/contacts", contactRouter);
 //app.use("/api/analytics", analyticsRouter);

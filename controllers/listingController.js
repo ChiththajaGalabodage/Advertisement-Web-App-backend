@@ -99,7 +99,7 @@ export async function getListings(req, res) {
     // Fetch all listings, sorted by creation date (newest first)
     const listings = await Listing.find()
       .sort({ createdAt: -1 }) // Sort by creation date in descending order
-      .populate("userRef", "firstName lastName email phoneNumber img -password") // Include user details, exclude password
+      .populate("userRef", "firstName lastName email phoneNumber img") // Include user details, exclude password
       .exec();
 
     res.status(200).json({
@@ -276,7 +276,7 @@ export async function updateListing(req, res) {
       productId,
       updateData,
       { new: true, runValidators: true },
-    ).populate("userRef", "firstName lastName email phoneNumber img -password");
+    ).populate("userRef", "firstName lastName email phoneNumber img");
 
     res.status(200).json({
       message: "Listing updated successfully",
@@ -296,10 +296,7 @@ export async function getListingBySlug(req, res) {
   try {
     const listing = await Listing.findOne({
       listingId: req.params.listingId,
-    }).populate(
-      "userRef",
-      "firstName lastName email phoneNumber img -password",
-    );
+    }).populate("userRef", "firstName lastName email phoneNumber img");
 
     if (!listing) {
       return res.status(404).json({ message: "Listing not found" });
@@ -334,7 +331,7 @@ export async function getListingById(req, res) {
       id,
       { $inc: { views: 1 } },
       { new: true },
-    ).populate("userRef", "firstName lastName email phoneNumber img -password");
+    ).populate("userRef", "firstName lastName email phoneNumber img");
 
     if (!listing) {
       return res.status(404).json({
@@ -392,7 +389,7 @@ export async function searchListings(req, res) {
     // Execute query with population
     const listings = await Listing.find(filter)
       .sort({ createdAt: -1 }) // Sort by newest first
-      .populate("userRef", "firstName lastName email phoneNumber img -password")
+      .populate("userRef", "firstName lastName email phoneNumber img")
       .exec();
 
     // Return response
@@ -537,10 +534,7 @@ export async function updateListingByOwner(req, res) {
     const updatedListing = await Listing.findByIdAndUpdate(id, updateData, {
       new: true, // Return updated document
       runValidators: true, // Run schema validators
-    }).populate(
-      "userRef",
-      "firstName lastName email phoneNumber img -password",
-    );
+    }).populate("userRef", "firstName lastName email phoneNumber img");
 
     res.status(200).json({
       message: "Listing updated successfully",
