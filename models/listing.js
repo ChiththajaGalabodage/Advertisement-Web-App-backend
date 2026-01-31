@@ -13,7 +13,8 @@ const listingSchema = mongoose.Schema(
       required: true,
       enum: [
         "Vehicles",
-        "Hobbies",
+        "Hobbies, Sports & Kids",
+        "Mobile Phone",
         "Home & Living",
         "Business & Industry",
         "Property",
